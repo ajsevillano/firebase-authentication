@@ -7,25 +7,39 @@ export default function UpdateProfile() {
   const emailRef = useRef();
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
-  const { currentUser } = useAuth();
+  const { currentUser, updatePassword, updateEmail } = useAuth();
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const history = useHistory();
 
-  async function handleSubmit(e) {
-    // e.preventDefault();
-    // if (passwordRef.current.value !== passwordConfirmRef.current.value) {
-    //   return setError('Passwords do not match');
-    // }
-    // try {
-    //   setError('');
-    //   setLoading(true);
-    //   await signup(emailRef.current.value, passwordRef.current.value);
-    //   history.push('/');
-    // } catch {
-    //   setError('Failed to create an account');
-    // }
-    // setLoading(false);
+  function handleSubmit(e) {
+    e.preventDefault();
+    if (passwordRef.current.value !== passwordConfirmRef.current.value) {
+      return setError('Passwords do not match');
+    }
+
+    const promises = [];
+    setLoading(true);
+    setError('');
+
+    if (emailRef.current.value !== currentUser.email) {
+      promises.push(updateEmail(emailRef.current.value));
+    }
+
+    if (passwordRef.current.value) {
+      promises.push(updatePassword(passwordRef.current.value));
+    }
+
+    Promise.all(promises)
+      .then(() => {
+        history.push('/');
+      })
+      .catch(() => {
+        setError('Failed to update account');
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   }
 
   return (
@@ -49,7 +63,6 @@ export default function UpdateProfile() {
               <Form.Control
                 type="password"
                 ref={passwordRef}
-                required
                 placeholder="Leave blank to keep the same"
               />
             </Form.Group>
@@ -58,7 +71,6 @@ export default function UpdateProfile() {
               <Form.Control
                 type="password"
                 ref={passwordConfirmRef}
-                required
                 placeholder="Leave blank to keep the same"
               />
             </Form.Group>
