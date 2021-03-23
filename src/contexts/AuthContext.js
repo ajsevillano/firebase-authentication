@@ -8,7 +8,6 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  //State
   const [currentUser, setCurrentUser] = useState();
   const [loading, setLoading] = useState(true);
 
@@ -36,11 +35,10 @@ export function AuthProvider({ children }) {
     return currentUser.updatePassword(password);
   }
 
-  //UseEffect
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
-      setLoading(false);
       setCurrentUser(user);
+      setLoading(false);
     });
     return unsubscribe;
   }, []);
